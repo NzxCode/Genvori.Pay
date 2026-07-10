@@ -1,0 +1,256 @@
+================================================================================
+GENPAY BACKEND - POSTMAN TESTING GUIDE
+================================================================================
+
+BASE URL: http://localhost:3000/api/v1 (atau sesuai konfigurasi .env Anda)
+HEADERS: Content-Type: application/json
+AUTH: Authorization: Bearer <access_token> (untuk endpoint yang memerlukan authenticate)
+
+--------------------------------------------------------------------------------
+1. AUTHENTICATION FLOW
+--------------------------------------------------------------------------------
+
+A. REGISTER
+Endpoint: POST /auth/register
+Body: {
+  "name": "John Doe",
+  "full_name": "John Doe Fullname",
+  "email": "john@example.com",
+  "gender": "male",
+  "date_of_birth": "1995-01-01",
+  "password": "password123",
+  "role": "merchant" // Pilih 'merchant' atau 'user'
+}
+Response: 201 Created (status: pending_verification) - Otomatis membuat wallet 'cash'
+
+B. VERIFY OTP
+Endpoint: POST /auth/verify-otp
+Body: {
+  "email": "john@example.com",
+  "otp_code": "123456" // Cek di email atau console log
+}
+Response: 200 OK (Returns: access_token) -> SIMPAN TOKEN INI
+
+C. LOGIN (Password)
+Endpoint: POST /auth/login
+Body: {
+  "email": "john@example.com",
+  "password": "password123"
+}
+Response: 200 OK (Returns: access_token)
+
+D. LOGIN (PIN) - Hanya jika PIN sudah diaktifkan
+Endpoint: POST /auth/login-pin
+Body: {
+  "email": "john@example.com",
+  "pin": "123456"
+}
+Response: 200 OK (Returns: access_token)
+
+E. SET/ACTIVATE PIN
+Endpoint: POST /auth/set-pin
+Header: Authorization: Bearer <access_token>
+Body: {
+  "pin": "123456" // Harus 6 digit
+}
+Response: 200 OK
+
+F. GET PROFILE
+Endpoint: GET /auth/profile
+Header: Authorization: Bearer <access_token>
+Response: 200 OK (Returns: user and profile data)
+
+G. LOGOUT
+Endpoint: POST /auth/logout
+Header: Authorization: Bearer <access_token>
+Response: 200 OK
+
+H. FORGOT PASSWORD (Step 1: Send OTP)
+Endpoint: POST /auth/forgot-password
+Body: {
+  "email": "john@example.com"
+}
+Response: 200 OK (OTP sent to email)
+
+I. VERIFY RESET OTP (Step 2: Get Reset Token)
+Endpoint: POST /auth/verify-reset-otp
+Body: {
+  "email": "john@example.com",
+  "otp_code": "123456"
+}
+Response: 200 OK (Returns: reset_token) -> SIMPAN TOKEN INI
+
+J. RESET PASSWORD (Step 3: New Password)
+Endpoint: POST /auth/reset-password
+Body: {
+  "token": "<reset_token>",
+  "newPassword": "newsecurepassword123"
+}
+Response: 200 OK (Password updated)
+
+--------------------------------------------------------------------------------
+2. WALLET FEATURES (Requires Auth)
+--------------------------------------------------------------------------------
+
+A. CREATE WALLET
+Endpoint: POST /wallets
+Header: Authorization: Bearer <access_token>
+Body: {
+  "name": "savings" // Nama wallet baru, misal 'savings', 'debit', dll
+}
+Response: 201 Created (Otomatis generate account_number)
+
+B. GET ALL BALANCES
+Endpoint: GET /wallets
+Header: Authorization: Bearer <access_token>
+Response: 200 OK (List of user wallets)
+
+C. GET WALLET DETAIL
+Endpoint: GET /wallets/:walletId
+Header: Authorization: Bearer <access_token>
+Response: 200 OK (Detailed wallet info)
+
+D. GET TRANSACTIONS (Mutasi Wallet)
+Endpoint: GET /wallets/:walletId/transactions?page=1&limit=10
+Header: Authorization: Bearer <access_token>
+Response: 200 OK (Ledger history)
+
+E. TRANSFER FUNDS (Using Account Number)
+Endpoint: POST /wallets/transfer
+Header: Authorization: Bearer <access_token>
+Body: {
+  "fromAccountNumber": "123456789012",
+  "toAccountNumber": "987654321098",
+  "amount": 50000,
+  "description": "Transfer for project expense"
+}
+Response: 200 OK (Mencatat riwayat di pengirim & penerima)
+
+F. TOP UP WALLET
+Endpoint: POST /wallets/top-up
+Header: Authorization: Bearer <access_token>
+Body: {
+  "walletName": "cash", // e.g., 'cash', 'revenue', 'tax'
+  "amount": 100000,
+  "description": "Top up via Bank Transfer"
+}
+Response: 200 OK (Mencatat riwayat di history)
+
+--------------------------------------------------------------------------------
+3. PAYMENT SIMULATION (Requires Auth)
+--------------------------------------------------------------------------------
+
+A. CHARGE / PAY (Simulated Topup Saldo)
+Endpoint: POST /payments/charge
+Header: Authorization: Bearer <access_token>
+Body: {
+  "amount": 100000,
+  "projectId": "uuid-project",
+  "description": "Payment for Project X"
+}
+Response: 201 Created (Adds balance to 'cash' wallet & recorded in history)
+
+B. DIGITAL PAYMENT (Pulsa, Listrik, dll)
+Endpoint: POST /payments/digital-payment
+Header: Authorization: Bearer <access_token>
+Body: {
+  "type": "pulsa", // 'pulsa', 'listrik', 'token_listrik', 'topup_mbanking'
+  "target": "08123456789", // Nomor hp / ID Pelanggan
+  "amount": 50000,
+  "description": "Top up pulsa Telkomsel"
+}
+Response: 200 OK (Potong saldo 'cash', catat di digital_payments & history)
+
+C. GET PAYMENT STATUS
+Endpoint: GET /payments/:paymentId/status
+Header: Authorization: Bearer <access_token>
+Response: 200 OK
+
+--------------------------------------------------------------------------------
+4. PROJECT MANAGEMENT (Requires Auth + Role: merchant/founder)
+--------------------------------------------------------------------------------
+
+A. GET ALL PROJECTS
+Endpoint: GET /projects
+Header: Authorization: Bearer <access_token>
+Response: 200 OK
+
+B. CREATE PROJECT
+Endpoint: POST /projects
+Header: Authorization: Bearer <access_token>
+Body: {
+  "name": "Project Hackathon",
+  "budget": 1000000,
+  "status": "active"
+}
+Response: 201 Created
+
+C. GET PROJECT BY ID
+Endpoint: GET /projects/:projectId
+Header: Authorization: Bearer <access_token>
+Response: 200 OK
+
+D. UPDATE PROJECT
+Endpoint: PATCH /projects/:projectId
+Header: Authorization: Bearer <access_token>
+Body: {
+  "name": "Updated Project Name",
+  "budget": 1500000
+}
+Response: 200 OK
+
+E. REMOVE PROJECT (Soft Delete)
+Endpoint: DELETE /projects/:projectId
+Header: Authorization: Bearer <access_token>
+Response: 200 OK
+
+F. GET BUDGET ALLOCATION
+Endpoint: GET /projects/:projectId/budget
+Header: Authorization: Bearer <access_token>
+Response: 200 OK
+
+--------------------------------------------------------------------------------
+5. HISTORY & LOCATION (Requires Auth)
+--------------------------------------------------------------------------------
+
+A. GET TRANSACTION HISTORY (Unified)
+Endpoint: GET /history?page=1&limit=20&type=TRANSFER
+Header: Authorization: Bearer <access_token>
+Response: 200 OK (All financial activities in one list)
+
+B. UPDATE USER LOCATION (Precision GPS)
+Endpoint: POST /location/update
+Header: Authorization: Bearer <access_token>
+Body: {
+  "latitude": -6.2088,
+  "longitude": 106.8456,
+  "accuracy": 10,
+  "address": "Jl. Sudirman No. 1, Jakarta"
+}
+Response: 200 OK
+
+--------------------------------------------------------------------------------
+6. NOTIFICATIONS (Requires Auth)
+--------------------------------------------------------------------------------
+
+A. GET NOTIFICATIONS
+Endpoint: GET /notifications?page=1&limit=10&is_read=false
+Header: Authorization: Bearer <access_token>
+Response: 200 OK (List of user notifications)
+
+B. MARK NOTIFICATION AS READ
+Endpoint: PATCH /notifications/:notificationId/read
+Header: Authorization: Bearer <access_token>
+Response: 200 OK
+
+================================================================================
+TESTING SCENARIO (The Golden Path):
+1. Register as 'merchant' -> Verify OTP -> Login -> Get Token. (Otomatis dapat wallet 'cash')
+2. Update Location via /location/update.
+3. Top Up 'cash' wallet -> Check balance & /history.
+4. Create a Project -> Copy Project ID.
+5. Use /payments/charge with Project ID -> Watch 'cash' wallet balance increase & /history.
+6. Try /payments/digital-payment (Pulsa/Listrik) -> Watch 'cash' wallet decrease & /history.
+7. Try Transfer from 'cash' to another wallet using account_number -> Check /history.
+8. Set PIN via /auth/set-pin -> Logout -> Login again using /auth/login-pin.
+================================================================================
