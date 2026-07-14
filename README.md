@@ -6,8 +6,6 @@ Genvori.Pay is a comprehensive payment and wallet management application. It pro
 
 - **Wallet Management**: Create, list, and manage multiple digital wallets.
 - **Project Tracking**: Manage projects associated with payments or budgets.
-- **Payment Integration**: Integrated payment processing via Midtrans.
-- **AI Assistance**: AI-powered features integrated with Google Generative AI (Gemini).
 - **Secure Authentication**: 
   - JWT-based session management.
   - PIN-based login and setup for mobile security.
@@ -21,8 +19,6 @@ Genvori.Pay is a comprehensive payment and wallet management application. It pro
 - **Runtime**: Node.js
 - **Framework**: Express.js
 - **Database & Auth**: Supabase (PostgreSQL)
-- **Payments**: Midtrans
-- **AI**: Google Generative AI
 - **Email**: Resend
 - **Caching**: Redis
 - **Security**: Helmet, bcryptjs, JWT
