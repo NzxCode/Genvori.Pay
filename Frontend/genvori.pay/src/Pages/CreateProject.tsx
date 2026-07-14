@@ -10,21 +10,33 @@ interface CreateProjectProps {
   onBack: () => void;
 }
 
+// Helper for currency formatting
+const formatCurrency = (value: string) => {
+  if (!value) return '';
+  const numberValue = value.replace(/\D/g, '');
+  return numberValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
 export default function CreateProject({ accessToken, onBack }: CreateProjectProps) {
   const [name, setName] = useState('');
   const [budget, setBudget] = useState('');
   const [status, setStatus] = useState('active');
 
   // Fetch user profile to check role
-  const { data: user, isLoading: userLoading } = useQuery({
+  const { data: response, isLoading: userLoading } = useQuery({
     queryKey: ['profile', accessToken],
     queryFn: () => authApi.getProfile(accessToken!),
     enabled: !!accessToken,
   });
 
+  const user = response?.data || response;
+
   // Mutation for creating project
   const mutation = useMutation({
-    mutationFn: () => projectApi.create(accessToken!, { name, budget: Number(budget), status }),
+    mutationFn: (token: string) => {
+      const rawBudget = budget.replace(/\./g, '');
+      return projectApi.create(token, { name, budget: Number(rawBudget), status });
+    },
     onSuccess: () => {
       Alert.alert("Success", "Project berhasil dibuat!");
       onBack();
@@ -57,6 +69,18 @@ export default function CreateProject({ accessToken, onBack }: CreateProjectProp
     );
   }
 
+  const handleCreateProject = () => {
+    if (!accessToken) {
+      Alert.alert("Error", "Sesi Anda telah berakhir. Silakan login kembali.");
+      return;
+    }
+    if (!name || !budget) {
+      Alert.alert("Error", "Mohon isi nama project dan budget.");
+      return;
+    }
+    mutation.mutate(accessToken);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
@@ -84,8 +108,8 @@ export default function CreateProject({ accessToken, onBack }: CreateProjectProp
             style={styles.input}
             placeholder="0"
             keyboardType="numeric"
-            value={budget}
-            onChangeText={setBudget}
+            value={formatCurrency(budget)}
+            onChangeText={(text) => setBudget(text.replace(/\D/g, ''))}
           />
         </View>
 
@@ -108,8 +132,8 @@ export default function CreateProject({ accessToken, onBack }: CreateProjectProp
 
         <TouchableOpacity 
           style={styles.submitBtn} 
-          onPress={() => mutation.mutate()}
-          disabled={mutation.isPending || !name || !budget}
+          onPress={handleCreateProject}
+          disabled={mutation.isPending}
         >
           {mutation.isPending ? (
             <ActivityIndicator color="#FFF" />

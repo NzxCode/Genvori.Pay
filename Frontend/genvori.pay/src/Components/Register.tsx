@@ -15,10 +15,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authApi } from '../services/api';
+import { getFriendlyErrorMessage } from '../utils/errorHelper';
+
 
 interface RegisterProps {
   onNavigateToLogin: () => void;
-  onNavigateToVerify: () => void;
+  onNavigateToVerify: (email: string) => void;
 }
 
 export default function Register({ onNavigateToLogin, onNavigateToVerify }: RegisterProps) {
@@ -50,9 +52,9 @@ export default function Register({ onNavigateToLogin, onNavigateToVerify }: Regi
         role,
       });
       Alert.alert("Berhasil", "Akun berhasil dibuat. Silakan verifikasi email Anda.");
-      onNavigateToVerify();
+      onNavigateToVerify(email);
     } catch (error: any) {
-      Alert.alert("Registrasi Gagal", error.message);
+      Alert.alert("Registrasi Gagal", getFriendlyErrorMessage(error.message));
     } finally {
       setLoading(false);
     }

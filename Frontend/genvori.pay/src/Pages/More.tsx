@@ -52,18 +52,21 @@ export default function More({ accessToken, onNavigate }: MoreProps) {
           <View style={styles.gridContainer}>
             <TouchableOpacity 
               style={styles.gridItem} 
+              onPress={() => onNavigate('projectlist')}
+            >
+              <View style={[styles.iconBox, { backgroundColor: '#10B98115' }]}>
+                <Ionicons name="list-outline" size={26} color="#10B981" />
+              </View>
+              <Text style={styles.itemLabel}>My Projects</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.gridItem} 
               onPress={() => onNavigate('createproject')}
             >
               <View style={[styles.iconBox, { backgroundColor: '#4F46E515' }]}>
                 <Ionicons name="add-circle" size={26} color="#4F46E5" />
               </View>
               <Text style={styles.itemLabel}>Create Project</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.gridItem}>
-              <View style={[styles.iconBox, { backgroundColor: '#10B98115' }]}>
-                <Ionicons name="analytics" size={26} color="#10B981" />
-              </View>
-              <Text style={styles.itemLabel}>Project Report</Text>
             </TouchableOpacity>
           </View>
         </View>

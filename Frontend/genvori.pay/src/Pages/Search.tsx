@@ -57,7 +57,7 @@ export default function Search({ accessToken }: SearchProps) {
   );
 
   const filteredProjects = projects.filter((proj: any) =>
-    proj.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    proj.status !== 'deleted' && proj.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const loading = historyLoading || projectsLoading;

@@ -26,12 +26,10 @@ export default function Profile({ accessToken, onLogout, onNavigate }: ProfilePr
   });
 
   useEffect(() => {
-    const checkPinStatus = async () => {
-      const status = await SecureStore.getItemAsync('pin_enabled');
-      setPinEnabled(status === 'true');
-    };
-    checkPinStatus();
-  }, []);
+    if (user) {
+      setPinEnabled(user.pin_enabled === true || user.pin_enabled === 'true');
+    }
+  }, [user]);
 
   // Handle wrapped data: jika API mengembalikan { data: { ... } }, ambil bagian datanya
   const user = response?.data || response;

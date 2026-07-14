@@ -1,11 +1,29 @@
 import { supabase } from '../config/supabase.js'
 
-export async function getAll() {
+function handleSupabaseError(error) {
+  if (!error) return null;
+  
+  // PGRST116: The result contains 0 rows (for .single())
+  if (error.code === 'PGRST116') {
+    const err = new Error('Project not found');
+    err.statusCode = 404;
+    return err;
+  }
+  
+  const err = new Error(error.message);
+  err.statusCode = error.status || 500;
+  return err;
+}
+
+export async function getAll(userId) {
   const { data, error } = await supabase
     .from('projects')
     .select('*')
+    .eq('user_id', userId)
 
-  if (error) throw error
+  const handledError = handleSupabaseError(error);
+  if (handledError) throw handledError;
+  
   return data
 }
 
@@ -21,7 +39,9 @@ export async function create(userId, data) {
     .select()
     .single()
 
-  if (error) throw error
+  const handledError = handleSupabaseError(error);
+  if (handledError) throw handledError;
+  
   return project
 }
 
@@ -33,14 +53,16 @@ export async function getById(projectId, userId) {
     .eq('user_id', userId)
     .single()
 
-  if (pErr) throw pErr
+  const handledPErr = handleSupabaseError(pErr);
+  if (handledPErr) throw handledPErr;
 
   const { data: payments, error: payErr } = await supabase
     .from('payments')
     .select('*')
     .eq('project_id', projectId)
 
-  if (payErr) throw payErr
+  const handledPayErr = handleSupabaseError(payErr);
+  if (handledPayErr) throw handledPayErr;
 
   return { project, payments }
 }
@@ -54,7 +76,9 @@ export async function update(projectId, userId, data) {
     .select()
     .single()
 
-  if (error) throw error
+  const handledError = handleSupabaseError(error);
+  if (handledError) throw handledError;
+  
   return updatedProject
 }
 
@@ -65,7 +89,9 @@ export async function remove(projectId, userId) {
     .eq('id', projectId)
     .eq('user_id', userId)
 
-  if (error) throw error
+  const handledError = handleSupabaseError(error);
+  if (handledError) throw handledError;
+  
   return { success: true }
 }
 
@@ -77,7 +103,8 @@ export async function getBudgetAlocation(projectId, userId) {
     .eq('user_id', userId)
     .single()
 
-  if (pErr) throw pErr
+  const handledPErr = handleSupabaseError(pErr);
+  if (handledPErr) throw handledPErr;
 
   const { data: payments, error: payErr } = await supabase
     .from('payments')
@@ -85,7 +112,8 @@ export async function getBudgetAlocation(projectId, userId) {
     .eq('project_id', projectId)
     .eq('status', 'success')
 
-  if (payErr) throw payErr
+  const handledPayErr = handleSupabaseError(payErr);
+  if (handledPayErr) throw handledPayErr;
 
   const totalUsed = payments.reduce((sum, p) => sum + parseFloat(p.amount), 0)
   const totalBudget = parseFloat(project.budget)

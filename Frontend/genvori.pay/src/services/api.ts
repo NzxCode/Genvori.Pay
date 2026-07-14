@@ -1,9 +1,13 @@
 // src/services/api.ts
-const BASE_URL = 'http://192.168.1.9:3000/api/v1';
+const BASE_URL = 'http://localhost/api/v1';
 const API_KEY = '';
 
 async function request(endpoint: string, options: RequestInit = {}) {
     const url = `${BASE_URL}${endpoint}`;
+    
+    console.log(`\n--- START API REQUEST ---`);
+    console.log(`Endpoint: ${url}`);
+    console.log(`Method: ${options.method || 'GET'}`);
     
     const headers = {
         'Content-Type': 'application/json',
@@ -11,8 +15,17 @@ async function request(endpoint: string, options: RequestInit = {}) {
         ...options.headers,
     };
 
-    console.log(`[API Request] ${options.method || 'GET'} -> ${url}`);
-    console.log(`[API Headers]`, headers);
+    console.log(`Final Headers:`, JSON.stringify(headers, null, 2));
+    console.log(`Options provided:`, JSON.stringify(options, null, 2));
+
+    if (options.body && typeof options.body === 'string') {
+        try {
+            console.log(`Body:`, JSON.parse(options.body));
+        } catch (e) {
+            console.log(`Body (raw):`, options.body);
+        }
+    }
+    console.log(`--- END API REQUEST ---\n`);
 
     const response = await fetch(url, {
         ...options,
@@ -23,7 +36,6 @@ async function request(endpoint: string, options: RequestInit = {}) {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error(`[API Error] ${response.status}:`, errorData);
         throw new Error(errorData.message || `Request failed with status ${response.status}`);
     }
 

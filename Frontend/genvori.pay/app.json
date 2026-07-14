@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "genvori.pay",
-    "slug": "genvori.pay",
+    "name": "Genvori Pay",
+    "slug": "GenvoriPay",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/logo.jpeg",
     "scheme": "genvoripay",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -17,7 +17,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.genvori_pay"
     },
     "web": {
       "output": "static",
@@ -37,6 +38,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d4e945ab-01e2-40be-bd76-952a26299a8a"
+      }
     }
   }
 }

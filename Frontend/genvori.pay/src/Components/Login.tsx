@@ -15,6 +15,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authApi } from '../services/api';
+import { getFriendlyErrorMessage } from '../utils/errorHelper';
+
 
 interface LoginProps {
   onLoginSuccess: (token: string) => void;
@@ -40,7 +42,7 @@ export default function Login({ onLoginSuccess, onNavigateToRegister, onNavigate
       const response = await authApi.login({ email, password });
       onLoginSuccess(response.access_token);
     } catch (error: any) {
-      Alert.alert("Login Gagal", error.message);
+      Alert.alert("Login Gagal", getFriendlyErrorMessage(error.message));
     } finally {
       setLoading(false);
     }

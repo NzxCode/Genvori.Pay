@@ -2,19 +2,22 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    ActivityIndicator
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authApi } from '../services/api';
+import { getFriendlyErrorMessage } from '../utils/errorHelper';
+
+
 
 interface VerifyOTPProps {
   onVerifySuccess: (token: string) => void;
@@ -26,7 +29,7 @@ const OTP_LENGTH = 6;
 const RESEND_SECONDS = 60;
 
 export default function VerifyOTP({ onVerifySuccess, onNavigateBack, email: propEmail }: VerifyOTPProps) {
-  const [email] = useState(propEmail || 'reginarna67@gmail.com');
+  const [email] = useState(propEmail);
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const [countdown, setCountdown] = useState(RESEND_SECONDS);
   const [loading, setLoading] = useState(false);
@@ -72,7 +75,7 @@ export default function VerifyOTP({ onVerifySuccess, onNavigateBack, email: prop
       const response = await authApi.verifyOtp({ email, otp_code: otpCode });
       onVerifySuccess(response.access_token);
     } catch (error: any) {
-      Alert.alert("Verifikasi Gagal", error.message);
+      Alert.alert("Verifikasi Gagal", getFriendlyErrorMessage(error.message));
     } finally {
       setLoading(false);
     }

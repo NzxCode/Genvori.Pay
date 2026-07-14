@@ -7,6 +7,11 @@ import BottomTab from '../Components/Bottom';
 import TopUp from '../Components/TopUp';
 import Transfer from '../Components/Transfer';
 import CreateProject from '../Pages/CreateProject';
+import ProjectList from '../Pages/ProjectList';
+import ProjectDetail from '../Pages/ProjectDetail';
+import EditProject from '../Pages/EditProject';
+
+
 import Home from '../Pages/Home';
 import More from '../Pages/More';
 import Notifications from '../Pages/Notifications';
@@ -17,6 +22,7 @@ import SetPin from '../Pages/SetPin';
 import PinLogin from '../Pages/PinLogin';
 import Wallets from '../Pages/Wallets';
 import WalletDetail from '../Pages/WalletDetail';
+import { projectApi } from '../services/api';
 
 // Import komponen Auth dari folder Components
 import ForgotPassword from '../Components/ForgotPassword';
@@ -29,10 +35,11 @@ import VerifyResetOTP from '../Components/VerifyResetOTP';
 export default function MainScreen() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeScreen, setActiveScreen] = useState<'home' | 'search' | 'add' | 'notifications' | 'profile' | 'transfer' | 'topup' | 'createproject' | 'terms' | 'setpin' | 'pinlogin' | 'wallets' | 'walletdetail'>('home');
+  const [activeScreen, setActiveScreen] = useState<'home' | 'search' | 'add' | 'notifications' | 'profile' | 'transfer' | 'topup' | 'createproject' | 'terms' | 'setpin' | 'pinlogin' | 'wallets' | 'walletdetail' | 'projectlist' | 'projectdetail' | 'editproject'>('home');
 
   // STATE BARU: Untuk melacak halaman Auth mana yang aktif
   const [authScreen, setAuthScreen] = useState<'login' | 'register' | 'verify' | 'forgot-password' | 'verify-reset-otp' | 'reset-password'>('login');
+  const [regEmail, setRegEmail] = useState<string>('');
   const [resetEmail, setResetEmail] = useState<string>('');
   const [resetAccessToken, setResetAccessToken] = useState<string>('');
 
@@ -90,7 +97,10 @@ export default function MainScreen() {
       return (
         <Register
           onNavigateToLogin={() => setAuthScreen('login')}
-          onNavigateToVerify={() => setAuthScreen('verify')}
+          onNavigateToVerify={(email) => {
+            setRegEmail(email);
+            setAuthScreen('verify');
+          }}
         />
       );
     }
@@ -98,6 +108,7 @@ export default function MainScreen() {
     if (authScreen === 'verify') {
       return (
         <VerifyOTP
+          email={regEmail}
           onVerifySuccess={(token) => setAccessToken(token)}
         />
       );
@@ -149,10 +160,37 @@ export default function MainScreen() {
       case 'search': return <Search accessToken={accessToken} />;
       case 'add': return <More accessToken={accessToken} onNavigate={(screen) => setActiveScreen(screen as any)} />;
       case 'notifications': return <Notifications accessToken={accessToken} />;
-      case 'profile': return <Profile accessToken={accessToken} onLogout={() => setAccessToken(null)} onNavigate={(screen) => setActiveScreen(screen as any)} />;
+       case 'profile': return <Profile accessToken={accessToken} onLogout={() => {
+             setAccessToken(null);
+             setAuthScreen('login');
+           }} onNavigate={(screen) => setActiveScreen(screen as any)} />;
       case 'transfer': return <Transfer accessToken={accessToken} onBack={() => setActiveScreen('home')} />;
       case 'topup': return <TopUp accessToken={accessToken} onBack={() => setActiveScreen('home')} />;
       case 'createproject': return <CreateProject accessToken={accessToken} onBack={() => setActiveScreen('add')} />;
+    case 'projectlist': return <ProjectList accessToken={accessToken} onNavigate={(screen, params) => {
+         if (screen === 'projectdetail') {
+           (window as any).currentProjectId = params.projectId;
+           setActiveScreen('projectdetail');
+         } else {
+           setActiveScreen(screen as any);
+         }
+       }} onBack={() => setActiveScreen('add')} />;
+    case 'projectdetail': return <ProjectDetail 
+        accessToken={accessToken} 
+        projectId={(window as any).currentProjectId} 
+        onBack={() => setActiveScreen('projectlist')} 
+        onEdit={() => {
+          setActiveScreen('editproject');
+        }}
+        onDelete={async (id) => {
+          await projectApi.remove(accessToken!, id);
+        }}
+      />;
+    case 'editproject': return <EditProject 
+        accessToken={accessToken} 
+        projectId={(window as any).currentProjectId} 
+        onBack={() => setActiveScreen('projectdetail')} 
+      />;
       case 'terms': return <TermsAndConditions onBack={() => setActiveScreen('profile')} />;
       case 'setpin': return <SetPin accessToken={accessToken} onBack={() => setActiveScreen('profile')} />;
       case 'pinlogin': return <PinLogin onLoginSuccess={(token) => setAccessToken(token)} onBack={() => setAuthScreen('login')} />;

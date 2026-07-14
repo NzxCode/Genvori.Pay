@@ -15,6 +15,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authApi } from '../services/api';
+import { getFriendlyErrorMessage } from '../utils/errorHelper';
+
 
 interface ForgotPasswordProps {
   onNavigateBack: () => void;
@@ -39,7 +41,7 @@ export default function ForgotPassword({ onNavigateBack, onSubmitSuccess }: Forg
       Alert.alert("Berhasil", "Kode verifikasi telah dikirim ke email Anda.");
       onSubmitSuccess(email);
     } catch (error: any) {
-      Alert.alert("Gagal", error.message);
+      Alert.alert("Gagal", getFriendlyErrorMessage(error.message));
     } finally {
       setLoading(false);
     }

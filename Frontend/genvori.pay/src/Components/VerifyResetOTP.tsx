@@ -2,19 +2,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    ActivityIndicator
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authApi } from '../services/api';
+import { getFriendlyErrorMessage } from '../utils/errorHelper';
+
 
 interface VerifyResetOTPProps {
   email: string;
@@ -66,7 +68,7 @@ export default function VerifyResetOTP({ email, onNavigateBack, onVerifySuccess 
       const response = await authApi.verifyResetOtp({ email, otp_code: otpCode });
       onVerifySuccess(response.reset_token);
     } catch (error: any) {
-      Alert.alert("Verifikasi Gagal", error.message);
+      Alert.alert("Verifikasi Gagal", getFriendlyErrorMessage(error.message));
     } finally {
       setLoading(false);
     }

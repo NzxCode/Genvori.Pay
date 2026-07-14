@@ -4,7 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation } from '@tanstack/react-query';
 import { authApi } from '../services/api';
+import { getFriendlyErrorMessage } from '../utils/errorHelper';
 import * as SecureStore from 'expo-secure-store';
+
 
 interface SetPinProps {
   accessToken: string | null;
@@ -18,6 +20,16 @@ export default function SetPin({ accessToken, onBack }: SetPinProps) {
   const mutation = useMutation({
     mutationFn: async () => {
       await authApi.setPin(accessToken!, { pin });
+      
+      // Ambil email dari profile untuk disimpan di local storage
+      const profile = await authApi.getProfile(accessToken!);
+      const user = profile.data || profile;
+      const email = user.email;
+      
+      if (email) {
+        await SecureStore.setItemAsync('saved_login_email', email);
+      }
+      
       // Save PIN activation status using SecureStore
       await SecureStore.setItemAsync('pin_enabled', 'true');
     },
@@ -26,7 +38,7 @@ export default function SetPin({ accessToken, onBack }: SetPinProps) {
       onBack();
     },
     onError: (error: any) => {
-      Alert.alert("Error", error.message || "Gagal mengatur PIN");
+      Alert.alert("Error", getFriendlyErrorMessage(error.message) || "Gagal mengatur PIN");
     },
   });
 
