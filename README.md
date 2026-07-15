@@ -239,6 +239,16 @@ This is where we are today, not where we stop. As GEN-PAY starts moving real cli
 
 ---
 
+## Live Demo
+
+### Android APK
+
+Download the latest Android demo build here:
+
+https://github.com/NzxCode/Genvori.Pay/releases/latest
+
+---
+
 ## Team
 
 **Nicolas Gabriel Kurnadi** — Co-Founder & CPO. Product strategy, UI/UX, business development, infrastructure integration.
