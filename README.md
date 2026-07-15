@@ -249,6 +249,25 @@ https://github.com/NzxCode/Genvori.Pay/releases/latest
 
 ---
 
+## 🌌 Stellar Integration
+
+GEN-PAY is deployed on the Stellar Testnet as part of the APAC Stellar Hackathon 2026.
+
+| Network | Status | Contract |
+|----------|--------|----------|
+| Testnet | ✅ Deployed | `CAE7HWUZHTZD5GNJNQO3DXFSDF2UOQPNIAB5ZRTBV2GMMYKESZI4KEW3` |
+| Mainnet | ⏳ Planned | Coming Soon |
+
+### Smart Contract Explorer
+
+- **Stellar Lab**
+  https://lab.stellar.org/r/testnet/contract/CAE7HWUZHTZD5GNJNQO3DXFSDF2UOQPNIAB5ZRTBV2GMMYKESZI4KEW3
+
+- **Transaction**
+  https://stellar.expert/explorer/testnet/tx/78d499d72506e11c685f6be9a9b268b12931091703a128cd6bd1056ccd4f4cf3
+
+---
+
 ## Team
 
 **Nicolas Gabriel Kurnadi** — Co-Founder & CPO. Product strategy, UI/UX, business development, infrastructure integration.
